@@ -1,0 +1,83 @@
+# Personal Health Companion – Central Configuration
+# All tunable parameters live here. No constants in application logic.
+
+mqtt:
+  broker_host: "localhost"       # Change to Raspberry Pi IP when cross-device
+  broker_port: 1883
+  topic_sensors: "health/sensors"
+  client_id: "rpi_health_companion"
+  # username: ""                 # Uncomment if broker auth is enabled
+  # password: ""
+  keepalive: 60                  # seconds
+  reconnect_delay_min: 1         # seconds
+  reconnect_delay_max: 30        # seconds
+
+database:
+  path: "data/health.db"         # relative to project root; SQLite file
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+
+logging:
+  level: "INFO"                  # DEBUG | INFO | WARNING | ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+# ── Filtering ────────────────────────────────────────────────────────────────
+filters:
+  window_size: 10                # samples for rolling-median / moving-average
+  ema_alpha: 0.2                 # exponential-moving-average weight (0–1)
+
+# ── Rolling windows ───────────────────────────────────────────────────────────
+windows:
+  short_window: 20               # samples – used for smoothing & baseline seed
+  long_window: 60                # samples – used for trend analysis
+
+# ── Baseline ─────────────────────────────────────────────────────────────────
+baseline:
+  min_samples: 10                # minimum readings before baseline is trusted
+  ema_alpha: 0.05                # slow-update weight (smaller = slower drift)
+  # Seed values used before enough readings exist
+  seed_heart_rate: 72.0
+  seed_spo2: 98.0
+  seed_body_temperature: 36.6
+
+# ── Validation – physical plausibility ranges ─────────────────────────────────
+validation:
+  heart_rate:    { min: 20,   max: 250  }   # bpm
+  spo2:          { min: 50,   max: 100  }   # %
+  body_temperature: { min: 30.0, max: 45.0 } # °C
+  room_temperature: { min: -20.0, max: 65.0 } # °C
+  humidity:      { min: 0.0,  max: 100.0 }  # %
+
+# ── Risk thresholds ───────────────────────────────────────────────────────────
+risk:
+  # Heat-risk index
+  heat:
+    hi_watch_threshold: 32.0    # Heat Index °C → WATCH
+    hi_high_threshold:  41.0    # Heat Index °C → HIGH
+    hr_deviation_watch: 15.0    # bpm above baseline → WATCH
+    hr_deviation_high:  30.0    # bpm above baseline → HIGH
+    body_temp_watch:    37.5    # °C
+    body_temp_high:     38.0    # °C
+
+  # Vital-risk
+  vital:
+    hr_low_watch:   50          # bpm
+    hr_high_watch: 100          # bpm
+    hr_low_high:    40          # bpm
+    hr_high_high:  130          # bpm
+    temp_watch:    37.5         # °C
+    temp_high:     38.0         # °C
+    persistence_threshold: 3    # consecutive abnormal windows → HIGH
+
+  # Respiratory (SpO2-based)
+  respiratory:
+    spo2_watch: 95.0            # %
+    spo2_high:  90.0            # %
+    persistence_threshold: 3    # consecutive abnormal windows → HIGH
+
+# ── Alerts ────────────────────────────────────────────────────────────────────
+alerts:
+  cooldown_seconds: 300         # minimum seconds between same-category alerts

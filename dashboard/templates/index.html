@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Health Companion – Local Dashboard</title>
+  <meta name="description" content="Privacy-preserving local health monitoring dashboard for the Personal Health Companion system." />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-icon">🫀</span>
+        <h1 class="header-title">Personal Health Companion</h1>
+        <span class="header-badge">OFFLINE LOCAL</span>
+      </div>
+      <div class="header-meta">
+        <span id="last-update" class="last-update">Waiting for data…</span>
+        <div id="connection-dot" class="dot dot--connecting" title="Connection status"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-grid">
+
+    <!-- ── Overall Risk Banner ── -->
+    <section class="card card--full risk-banner" id="overall-banner">
+      <div class="risk-banner-label">Overall Health Status</div>
+      <div class="risk-banner-value" id="overall-status">—</div>
+    </section>
+
+    <!-- ── Vitals ── -->
+    <section class="card">
+      <h2 class="card-title">Live Physiology</h2>
+      <div class="metric-grid">
+        <div class="metric" id="metric-hr">
+          <div class="metric-icon">❤️</div>
+          <div class="metric-label">Heart Rate</div>
+          <div class="metric-value"><span id="val-hr">—</span><span class="metric-unit">bpm</span></div>
+          <div class="metric-sub" id="sub-hr"></div>
+        </div>
+        <div class="metric" id="metric-spo2">
+          <div class="metric-icon">🫁</div>
+          <div class="metric-label">SpO₂</div>
+          <div class="metric-value"><span id="val-spo2">—</span><span class="metric-unit">%</span></div>
+          <div class="metric-sub" id="sub-spo2"></div>
+        </div>
+        <div class="metric" id="metric-btemp">
+          <div class="metric-icon">🌡️</div>
+          <div class="metric-label">Body Temp</div>
+          <div class="metric-value"><span id="val-btemp">—</span><span class="metric-unit">°C</span></div>
+          <div class="metric-sub" id="sub-btemp"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Environment ── -->
+    <section class="card">
+      <h2 class="card-title">Environment</h2>
+      <div class="metric-grid">
+        <div class="metric" id="metric-rtemp">
+          <div class="metric-icon">🌡️</div>
+          <div class="metric-label">Room Temp</div>
+          <div class="metric-value"><span id="val-rtemp">—</span><span class="metric-unit">°C</span></div>
+        </div>
+        <div class="metric" id="metric-hum">
+          <div class="metric-icon">💧</div>
+          <div class="metric-label">Humidity</div>
+          <div class="metric-value"><span id="val-hum">—</span><span class="metric-unit">%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Risk Breakdown ── -->
+    <section class="card">
+      <h2 class="card-title">Risk Indicators</h2>
+      <div class="risk-grid">
+        <div class="risk-chip" id="chip-heat">
+          <span class="risk-chip-label">🔥 Heat</span>
+          <span class="risk-chip-value" id="val-heat">—</span>
+        </div>
+        <div class="risk-chip" id="chip-vital">
+          <span class="risk-chip-label">💓 Vital Signs</span>
+          <span class="risk-chip-value" id="val-vital">—</span>
+        </div>
+        <div class="risk-chip" id="chip-resp">
+          <span class="risk-chip-label">🫁 SpO₂</span>
+          <span class="risk-chip-value" id="val-resp">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Recommendation ── -->
+    <section class="card card--full">
+      <h2 class="card-title">Recommendation</h2>
+      <p id="recommendation" class="recommendation-text">Waiting for data…</p>
+      <ul id="reasons-list" class="reasons-list"></ul>
+    </section>
+
+    <!-- ── Trend Charts ── -->
+    <section class="card card--full">
+      <h2 class="card-title">Recent Trends</h2>
+      <div class="chart-row">
+        <div class="chart-wrap">
+          <div class="chart-label">Heart Rate (bpm)</div>
+          <canvas id="chart-hr" height="100"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-label">SpO₂ (%)</div>
+          <canvas id="chart-spo2" height="100"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-label">Body Temperature (°C)</div>
+          <canvas id="chart-btemp" height="100"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Stats ── -->
+    <section class="card">
+      <h2 class="card-title">Pipeline Stats</h2>
+      <div class="stat-list">
+        <div class="stat-row"><span>Total readings</span><span id="stat-total">—</span></div>
+        <div class="stat-row"><span>Rejected packets</span><span id="stat-rejected">—</span></div>
+        <div class="stat-row"><span>Device</span><span id="stat-device">—</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Alert toast -->
+  <div id="alert-toast" class="alert-toast hidden"></div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Darwin",
+  "pythonPath": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+  "venvPath": ".",
+  "include": ["app", "tests"],
+  "exclude": ["**/__pycache__"],
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none"
+}

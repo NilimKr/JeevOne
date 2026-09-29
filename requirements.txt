@@ -1,0 +1,31 @@
+# Personal Health Companion – Python dependencies
+# Install with: pip install -r requirements.txt
+
+# MQTT client
+paho-mqtt>=2.0.0
+
+# Web framework & server
+flask>=3.0.0
+flask-cors>=4.0.0
+fastapi>=0.100.0
+uvicorn[standard]>=0.24.0
+
+# Data validation
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Database ORM
+SQLAlchemy>=2.0.0
+
+# Configuration
+PyYAML>=6.0
+python-dotenv>=1.0.0
+
+# Numerics (filtering, statistics)
+numpy>=1.24.0
+
+# WebSocket support (dashboard real-time updates)
+flask-sock>=0.7.0
+
+# HTTP async client (optional; used in tests)
+httpx>=0.25.0
