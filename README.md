@@ -28,9 +28,10 @@ pip install -r requirements.txt
 **macOS (dev):**
 ```bash
 brew install mosquitto
-mkdir -p /tmp/mosquitto_health
 /opt/homebrew/opt/mosquitto/sbin/mosquitto -c config/mosquitto.conf -d
 ```
+> Note: The `persistence` block in `mosquitto.conf` is ignored on macOS unless
+> `/var/lib/mosquitto/` exists. For local dev this is fine — persistence is optional.
 
 **Raspberry Pi:**
 ```bash
@@ -38,6 +39,7 @@ sudo apt install mosquitto mosquitto-clients -y
 sudo cp config/mosquitto.conf /etc/mosquitto/conf.d/health.conf
 sudo systemctl restart mosquitto
 ```
+> `apt install mosquitto` automatically creates `/var/lib/mosquitto/`, so persistence works out of the box.
 
 ### 3. Start the processing pipeline + API + Dashboard
 
