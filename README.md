@@ -1,55 +1,76 @@
-# Personal Health Companion
+# 🏥 Personal Health Companion
 
-Privacy-preserving, offline-capable health monitoring pipeline for the Raspberry Pi edge device.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20macOS-lightgrey)
+![Offline Capable](https://img.shields.io/badge/offline-fully_supported-success)
 
-```
-Sensors → ESP32 → MQTT → Raspberry Pi → Local Processing → Risk Engine → Local Dashboard
-```
+Privacy-preserving, offline-capable health monitoring pipeline designed for edge devices like the Raspberry Pi.
 
-## Architecture
-
-- **ESP32**: Sensor acquisition + MQTT publish only
-- **Raspberry Pi** (this codebase): complete edge-processing platform — MQTT broker, subscriber, validation, SQLite, risk engines, REST API, dashboard
-
-Internet access is NOT required for core operation.
+> **Note:** This system operates entirely locally. Internet access is NOT required for core operation. Your health data stays in your control. 🔒
 
 ---
 
-## Quick Start
+## 🏗️ Architecture Overview
 
-### 1. Install dependencies
+The system is designed with a lightweight, disconnected edge computing model:
+
+```mermaid
+graph LR
+    A[🌡️ Sensors] --> B[🔌 ESP32]
+    B -->|MQTT| C[🍓 Raspberry Pi]
+    C -->|Local Processing| D[🧠 Risk Engine]
+    D -->|SSE| E[📊 Local Dashboard]
+```
+
+- **🔌 ESP32**: Handles sensor data acquisition and publishes it over MQTT.
+- **🍓 Raspberry Pi**: The core edge-processing platform running this codebase. Features include:
+  - MQTT Broker & Subscriber
+  - Payload Validation & Normalization
+  - SQLite Database Storage
+  - Advanced Risk Engines (Heat, Vital, Respiratory)
+  - REST API & Real-time Dashboard
+
+---
+
+## 🚀 Quick Start
+
+### 1️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Install and start Mosquitto broker
+### 2️⃣ Install and Start Mosquitto Broker
 
-**macOS (dev):**
+**🍎 macOS (Development):**
 ```bash
 brew install mosquitto
 /opt/homebrew/opt/mosquitto/sbin/mosquitto -c config/mosquitto.conf -d
 ```
-> Note: The `persistence` block in `mosquitto.conf` is ignored on macOS unless
-> `/var/lib/mosquitto/` exists. For local dev this is fine — persistence is optional.
+> *Note:* The `persistence` block in `mosquitto.conf` is ignored on macOS unless `/var/lib/mosquitto/` exists. For local development, persistence is optional.
 
-**Raspberry Pi:**
+**🍓 Raspberry Pi (Production):**
 ```bash
 sudo apt install mosquitto mosquitto-clients -y
 sudo cp config/mosquitto.conf /etc/mosquitto/conf.d/health.conf
 sudo systemctl restart mosquitto
 ```
-> `apt install mosquitto` automatically creates `/var/lib/mosquitto/`, so persistence works out of the box.
+> *Note:* `apt install mosquitto` automatically creates `/var/lib/mosquitto/`, so persistence works out of the box.
 
-### 3. Start the processing pipeline + API + Dashboard
+### 3️⃣ Start the Processing Pipeline
+
+This will initialize the pipeline, REST API, and real-time dashboard.
 
 ```bash
 python -m app.main
 ```
 
-Open `http://localhost:8000` in a browser.
+🌐 **Access the Dashboard:** Open `http://localhost:8000` in a web browser.
 
-### 4. Run the ESP32 simulator (if hardware is not connected)
+### 4️⃣ Run the ESP32 Simulator (Optional)
+
+If you do not have physical hardware connected, you can simulate sensor data:
 
 ```bash
 # Normal scenario
@@ -58,34 +79,39 @@ python scripts/simulate_esp32.py --scenario normal --interval 2
 # Heat-stress test
 python scripts/simulate_esp32.py --scenario heat_stress --count 30
 
-# Available scenarios: normal | heat_stress | abnormal_hr | low_spo2 | combined_risk
+# List available scenarios
 python scripts/simulate_esp32.py --list
 ```
+> *Scenarios available:* `normal` | `heat_stress` | `abnormal_hr` | `low_spo2` | `combined_risk`
 
 ---
 
-## API Endpoints
+## 📡 API Endpoints
+
+The system exposes a lightweight REST API and a Server-Sent Events (SSE) stream for real-time dashboard updates.
 
 | Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/health` | Service liveness check |
-| GET | `/api/status` | Pipeline statistics |
-| GET | `/api/latest` | Latest reading + risk state |
-| GET | `/api/risk` | Risk breakdown |
-| GET | `/api/history` | Recent sensor readings (DB) |
-| GET | `/api/alerts` | Recent alert history |
-| GET | `/api/baseline` | Current personal baseline |
-| GET | `/stream` | SSE real-time update stream |
+| :--- | :--- | :--- |
+| 🟢 `GET` | `/api/health` | Service liveness check |
+| 📊 `GET` | `/api/status` | Pipeline statistics |
+| 🆕 `GET` | `/api/latest` | Latest sensor reading + current risk state |
+| ⚠️ `GET` | `/api/risk` | Detailed risk breakdown |
+| 📜 `GET` | `/api/history` | Recent sensor readings from local SQLite database |
+| 🔔 `GET` | `/api/alerts` | Recent alert history and active notifications |
+| 👤 `GET` | `/api/baseline`| Current dynamic personal baseline metrics |
+| ⚡ `GET` | `/stream` | Server-Sent Events (SSE) real-time update stream |
 
 ---
 
-## MQTT Topics
+## 📨 MQTT Integration
+
+### Topics
 
 | Topic | Direction | Description |
-|-------|-----------|-------------|
-| `health/sensors` | ESP32 → Pi | Sensor data JSON payload |
+| :--- | :--- | :--- |
+| `health/sensors` | ESP32 ➡️ Pi | Sensor data JSON payload |
 
-### Expected Payload
+### Expected Payload Structure
 ```json
 {
   "device_id": "esp32_01",
@@ -100,135 +126,90 @@ python scripts/simulate_esp32.py --list
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
-```
+A clean, modular directory structure ensuring easy maintenance and scalability:
+
+```text
 personal-health-companion/
-├── config/
-│   ├── config.yaml          # All tunable parameters (no scattered constants)
-│   └── mosquitto.conf       # Broker configuration
-├── app/
-│   ├── main.py              # Entry point – wires the complete pipeline
-│   ├── config_loader.py     # Singleton config access
+├── ⚙️ config/
+│   ├── config.yaml          # System parameters and thresholds
+│   └── mosquitto.conf       # MQTT Broker configuration
+├── 🧩 app/
+│   ├── main.py              # Application entry point
+│   ├── config_loader.py     # Singleton configuration loader
 │   ├── logger.py            # Structured logging setup
-│   ├── pipeline_state.py    # Thread-safe shared state (MQTT ↔ API)
-│   ├── mqtt/
-│   │   ├── client.py        # Robust MQTT client (reconnect, error isolation)
-│   │   └── topics.py        # Topic registry
-│   ├── ingestion/
-│   │   ├── validator.py     # Schema + type + plausibility checks
-│   │   ├── normalizer.py    # Raw dict → SensorReading dataclass
-│   │   └── processor.py     # validate → normalize pipeline
-│   ├── storage/
-│   │   ├── database.py      # SQLite engine init (WAL mode)
-│   │   ├── models.py        # ORM models (sensor_readings, risk_states)
-│   │   └── repository.py    # All DB reads/writes
-│   ├── processing/
-│   │   ├── filters.py       # Rolling median, moving average, EMA
-│   │   ├── windows.py       # Sliding windows for each sensor channel
-│   │   ├── features.py      # Derived features (heat index, strain, deviations)
-│   │   └── baseline.py      # Slow-EMA personal baseline engine
-│   ├── risk/
-│   │   ├── heat.py          # Heat-risk indicator (LOW|WATCH|HIGH)
-│   │   ├── vital.py         # Vital-signs risk indicator (stateful persistence)
-│   │   ├── respiratory.py   # SpO₂-based respiratory risk indicator
-│   │   ├── fusion.py        # Combines three engines → overall status
-│   │   └── recommendations.py  # Conservative wellness recommendations
-│   ├── alerts/
-│   │   └── manager.py       # State-change detection + cooldown debouncing
-│   └── api/
-│       ├── routes.py        # Flask REST API (6 endpoints)
-│       └── websocket.py     # SSE real-time stream (/stream)
-├── dashboard/
-│   ├── templates/index.html # Dark-mode dashboard UI
-│   └── static/
-│       ├── css/dashboard.css
-│       └── js/dashboard.js  # SSE client + canvas sparkline charts
-├── scripts/
-│   └── simulate_esp32.py   # ESP32 simulator (5 scenarios, dev-only)
-├── tests/
-│   ├── test_validator.py
-│   ├── test_filters.py
-│   ├── test_baseline.py
-│   └── test_risk_engines.py
-├── requirements.txt
-├── .env.example
-└── .gitignore
+│   ├── pipeline_state.py    # Thread-safe state sharing (MQTT ↔ API)
+│   ├── 📡 mqtt/             # MQTT integration (Client, Topics)
+│   ├── 📥 ingestion/        # Data validation, normalization & processing
+│   ├── 💾 storage/          # SQLite database engines, ORM & repositories
+│   ├── ⚙️ processing/       # Feature extraction, sliding windows, baselines
+│   ├── 🧠 risk/             # Health risk engines (Heat, Vital, Fusion, etc.)
+│   ├── 🔔 alerts/           # Alert management and debouncing
+│   └── 🌐 api/              # Flask REST API and WebSocket routes
+├── 🖥️ dashboard/
+│   ├── templates/           # Dark-mode dashboard UI (HTML)
+│   └── static/              # CSS styles and JavaScript assets
+├── 🛠️ scripts/
+│   └── simulate_esp32.py    # ESP32 data simulator
+├── 🧪 tests/                # Comprehensive test suites (pytest)
+├── 📄 requirements.txt      # Python dependencies
+└── 📄 .env.example          # Environment variables template
 ```
 
 ---
 
-## Configuration
+## 🛠️ Configuration
 
-All parameters live in `config/config.yaml`.
-Environment variables (from `.env` or shell) override YAML values.
+All tunable pipeline parameters reside in [`config/config.yaml`](config/config.yaml), keeping code free of scattered magic constants. Environment variables (set via `.env` or your shell) seamlessly override these YAML values.
 
-See `.env.example` for the available overrides.
+Refer to the included `.env.example` file for a list of available overrides.
 
 ---
 
-## Running Tests
+## 🧪 Testing
+
+The codebase includes an extensive test suite. Run all tests locally using `pytest`. All 54 tests are designed to pass entirely offline, requiring no external MQTT broker connections.
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-All 54 tests should pass without a broker connection.
+---
+
+## 🔄 Data Pipeline Flow
+
+To ensure robustness, data passes through multiple distinct stages:
+
+1. **Ingestion**: MQTT message is received.
+2. **Validation**: Schema, types, timestamps, and plausibility checks are performed.
+3. **Normalization**: Validated payload is converted into a structured `SensorReading` dataclass.
+4. **Storage**: The raw reading is safely persisted in the local SQLite database.
+5. **Processing**: Sliding windows and personal baselines (using slow EMA) are updated.
+6. **Feature Extraction**: Derived metrics like heat index, vital deviations, and physiological strain are calculated.
+7. **Risk Assessment**: Independent evaluation is conducted by Heat, Vital, and Respiratory engines.
+8. **Fusion**: Sub-engines are combined to determine overall risk status and generate contextual recommendations.
+9. **Alerts**: State-change detection triggers, applying cooldown debouncing to prevent notification fatigue.
+10. **Delivery**: Real-time SSE notification is pushed instantly to the local web dashboard.
 
 ---
 
-## Pipeline
+## 🚫 Offline Operation & Privacy
 
-```
-MQTT message received
-     ↓
-validate (schema + types + timestamp + plausibility)
-     ↓
-normalize → SensorReading dataclass
-     ↓
-SQLite insert (raw reading)
-     ↓
-sliding windows updated
-     ↓
-personal baseline updated (slow EMA, outlier-guarded)
-     ↓
-feature extraction (heat index, deviations, strain)
-     ↓
-heat risk engine
-vital risk engine
-respiratory (SpO₂) risk engine
-     ↓
-risk fusion → overall status
-     ↓
-recommendation engine
-     ↓
-SQLite insert (risk state)
-     ↓
-shared in-memory state updated
-     ↓
-alert manager (state-change + cooldown)
-     ↓
-SSE notification → dashboard
-```
+This system is built with strict **privacy by design**. The entire stack operates locally on your edge device without requiring outbound internet access:
 
----
-
-## Offline Operation
-
-The system requires no internet. All of the following run locally on the Pi:
-
-- Mosquitto MQTT broker
-- Python processing pipeline
-- SQLite database
+- Mosquitto MQTT Broker
+- Python Processing Pipeline
+- SQLite Database
 - Flask API
-- Dashboard
+- Web Dashboard
 
-The only external dependency at startup is the Google Fonts CDN link in the dashboard HTML. To make this fully offline, download the fonts and serve them locally.
+> 💡 *Tip:* The only external dependency at startup is the Google Fonts CDN link in the dashboard HTML. To make the dashboard fully air-gapped, simply download the fonts and serve them locally.
 
 ---
 
-## Important Notes
+## ⚠️ Important Disclaimers
 
-- **Sensor error ≠ health event.** Malformed/impossible readings are rejected at validation. A bad packet never produces a health alert.
-- **Not a medical device.** All risk outputs are wellness monitoring indicators. Language in recommendations is intentionally conservative.
-- **Personal baseline** updates slowly (EMA α=0.05) and rejects outliers, so a temporary abnormal period does not corrupt the individual's baseline.
+- 🛡️ **Sensor error ≠ health event.** Malformed or physically impossible readings are immediately rejected during the validation phase. A bad packet will never falsely trigger a health alert.
+- 🩺 **Not a medical device.** All risk outputs are strictly intended as wellness monitoring indicators. The language used in auto-generated recommendations is intentionally conservative.
+- 📉 **Adaptive Baselines:** Personal baselines update slowly over time (using Exponential Moving Average, α=0.05) and automatically reject extreme outliers. Temporary anomalous readings will not persistently corrupt the individual's long-term baseline.

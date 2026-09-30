@@ -32,11 +32,13 @@ def process_raw(payload: dict) -> Optional[SensorReading]:
 
     reading = normalize(payload)
     _log.debug(
-        "Ingested reading from %s @ %s – HR=%.0f SpO2=%.1f Temp=%.1f",
+        "Ingested reading from %s @ %s – HR=%.0f SpO2=%.1f Temp=%.1f BP=%d/%d",
         reading.device_id,
         reading.timestamp.isoformat(),
         reading.heart_rate,
         reading.spo2,
         reading.body_temperature,
+        reading.bp_sys,
+        reading.bp_dia,
     )
     return reading

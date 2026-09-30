@@ -29,11 +29,14 @@ class Features:
     body_temperature: float
     room_temperature: float
     humidity: float
+    bp_sys: float                # mmHg
+    bp_dia: float                # mmHg
 
     # Smoothed (rolling median over short window)
     heart_rate_smooth: float
     spo2_smooth: float
     body_temperature_smooth: float
+    bp_sys_smooth: float         # mmHg
 
     # Moving averages
     heart_rate_ma: float
@@ -65,10 +68,12 @@ def compute_features(
     hr_vals = windows.heart_rate.values()
     spo2_vals = windows.spo2.values()
     temp_vals = windows.body_temperature.values()
+    bp_sys_vals = windows.bp_sys.values()
 
     hr_smooth = rolling_median(hr_vals) or reading.heart_rate
     spo2_smooth = rolling_median(spo2_vals) or reading.spo2
     temp_smooth = rolling_median(temp_vals) or reading.body_temperature
+    bp_sys_smooth = rolling_median(bp_sys_vals) or reading.bp_sys
 
     hr_ma = moving_average(hr_vals) or reading.heart_rate
     spo2_ma = moving_average(spo2_vals) or reading.spo2
@@ -94,9 +99,12 @@ def compute_features(
         body_temperature=reading.body_temperature,
         room_temperature=reading.room_temperature,
         humidity=reading.humidity,
+        bp_sys=reading.bp_sys,
+        bp_dia=reading.bp_dia,
         heart_rate_smooth=hr_smooth,
         spo2_smooth=spo2_smooth,
         body_temperature_smooth=temp_smooth,
+        bp_sys_smooth=bp_sys_smooth,
         heart_rate_ma=hr_ma,
         spo2_ma=spo2_ma,
         body_temperature_ma=temp_ma,

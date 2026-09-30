@@ -88,6 +88,8 @@ def history() -> Response:
                 "body_temperature": r.body_temperature,
                 "room_temperature": r.room_temperature,
                 "humidity": r.humidity,
+                "bp_sys": r.bp_sys,
+                "bp_dia": r.bp_dia,
             }
             for r in records
         ]

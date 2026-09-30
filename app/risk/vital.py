@@ -3,8 +3,8 @@ risk/vital.py
 =============
 Vital-signs risk indicator.
 
-Analyzes HR and body temperature against absolute thresholds and personal
-baseline deviation.
+Analyzes HR, body temperature, and blood pressure against absolute thresholds
+and personal baseline deviation.
 
 Single abnormal reading → WATCH (continue monitoring).
 Persistent or combined deviations → HIGH.
@@ -48,6 +48,8 @@ class VitalRiskEngine:
 
         hr = features.heart_rate_smooth
         temp = features.body_temperature_smooth
+        bp_sys = features.bp_sys_smooth
+        bp_dia = features.bp_dia
 
         # ── Absolute HR thresholds ───────────────────────────────────────
         if hr >= rc["hr_high_high"]:
@@ -76,6 +78,36 @@ class VitalRiskEngine:
             reasons.append(f"Body temperature slightly elevated ({temp:.1f} °C ≥ {rc['temp_watch']} °C)")
             risk = _escalate(risk, RISK_WATCH)
             is_abnormal = True
+
+        # ── Blood pressure thresholds ─────────────────────────────────────
+        # Only evaluate if a BP reading is present (bp_sys > 0 means sensor fitted)
+        if bp_sys > 0:
+            bp_sys_high_high = rc.get("bp_sys_high_high", 140)
+            bp_sys_high_watch = rc.get("bp_sys_high_watch", 130)
+            bp_sys_low_high = rc.get("bp_sys_low_high", 90)
+            bp_dia_high_high = rc.get("bp_dia_high_high", 90)
+            bp_dia_high_watch = rc.get("bp_dia_high_watch", 80)
+
+            # Hypertension
+            if bp_sys >= bp_sys_high_high or bp_dia >= bp_dia_high_high:
+                reasons.append(
+                    f"Stage 2 hypertension (BP {bp_sys:.0f}/{bp_dia:.0f} mmHg)"
+                )
+                risk = _escalate(risk, RISK_HIGH)
+                is_abnormal = True
+            elif bp_sys >= bp_sys_high_watch or bp_dia >= bp_dia_high_watch:
+                reasons.append(
+                    f"Elevated blood pressure (BP {bp_sys:.0f}/{bp_dia:.0f} mmHg)"
+                )
+                risk = _escalate(risk, RISK_WATCH)
+                is_abnormal = True
+            # Hypotension
+            elif bp_sys < bp_sys_low_high:
+                reasons.append(
+                    f"Low blood pressure / hypotension (SYS {bp_sys:.0f} mmHg < {bp_sys_low_high} mmHg)"
+                )
+                risk = _escalate(risk, RISK_HIGH)
+                is_abnormal = True
 
         # ── Persistence escalation ────────────────────────────────────────
         if is_abnormal:

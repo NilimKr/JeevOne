@@ -50,6 +50,9 @@ validation:
   body_temperature: { min: 30.0, max: 45.0 } # °C
   room_temperature: { min: -20.0, max: 65.0 } # °C
   humidity:      { min: 0.0,  max: 100.0 }  # %
+  blood_pressure:
+    sys:         { min: 50,   max: 250  }   # mmHg systolic
+    dia:         { min: 30,   max: 150  }   # mmHg diastolic
 
 # ── Risk thresholds ───────────────────────────────────────────────────────────
 risk:
@@ -70,6 +73,12 @@ risk:
     hr_high_high:  130          # bpm
     temp_watch:    37.5         # °C
     temp_high:     38.0         # °C
+    # Blood pressure (mmHg) – AHA 2017 classification
+    bp_sys_high_watch: 130      # Stage 1 hypertension threshold
+    bp_sys_high_high:  140      # Stage 2 hypertension threshold
+    bp_sys_low_high:    90      # Hypotension threshold
+    bp_dia_high_watch:  80      # Stage 1 diastolic threshold
+    bp_dia_high_high:   90      # Stage 2 diastolic threshold
     persistence_threshold: 3    # consecutive abnormal windows → HIGH
 
   # Respiratory (SpO2-based)

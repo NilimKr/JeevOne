@@ -5,135 +5,262 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Personal Health Companion – Local Dashboard</title>
   <meta name="description" content="Privacy-preserving local health monitoring dashboard for the Personal Health Companion system." />
-  <link rel="stylesheet" href="/static/css/dashboard.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
 </head>
 <body>
-  <header class="header">
+
+  <!-- ══ Header ══════════════════════════════════════════════════════════════ -->
+  <header class="header" role="banner">
     <div class="header-inner">
       <div class="header-brand">
-        <span class="header-icon">🫀</span>
+        <div class="header-logo" id="header-logo-icon" aria-label="Health Companion"></div>
         <h1 class="header-title">Personal Health Companion</h1>
-        <span class="header-badge">OFFLINE LOCAL</span>
+        <span class="header-badge">Offline Local</span>
       </div>
       <div class="header-meta">
-        <span id="last-update" class="last-update">Waiting for data…</span>
-        <div id="connection-dot" class="dot dot--connecting" title="Connection status"></div>
+        <span id="last-update" class="last-update">
+          <span id="last-update-icon"></span>
+          <span id="last-update-text">Waiting for data…</span>
+        </span>
+        <div id="connection-dot" class="dot dot--connecting" title="Connection status" role="status" aria-label="Connection status"></div>
       </div>
     </div>
   </header>
 
-  <main class="main-grid">
+  <!-- ══ Main Dashboard Grid ═════════════════════════════════════════════════ -->
+  <main class="main-grid" id="main-dashboard" role="main">
 
-    <!-- ── Overall Risk Banner ── -->
-    <section class="card card--full risk-banner" id="overall-banner">
-      <div class="risk-banner-label">Overall Health Status</div>
-      <div class="risk-banner-value" id="overall-status">—</div>
+    <!-- ── Overall Risk Banner ──────────────────────────────────────────── -->
+    <section class="card col-full risk-banner" id="overall-banner" aria-label="Overall health status">
+      <div class="risk-banner-left">
+        <div class="risk-banner-label">Overall Health Status</div>
+        <div class="risk-banner-sub" id="banner-sub">Awaiting live data</div>
+      </div>
+      <div class="risk-banner-center">
+        <div class="risk-banner-icon" id="banner-icon"></div>
+        <div class="risk-banner-value" id="overall-status">—</div>
+      </div>
+      <div class="risk-banner-right">
+        <div class="risk-banner-label">Last Reading</div>
+        <div class="risk-banner-sub" id="banner-ts">—</div>
+      </div>
     </section>
 
-    <!-- ── Vitals ── -->
-    <section class="card">
-      <h2 class="card-title">Live Physiology</h2>
-      <div class="metric-grid">
-        <div class="metric" id="metric-hr">
-          <div class="metric-icon">❤️</div>
-          <div class="metric-label">Heart Rate</div>
-          <div class="metric-value"><span id="val-hr">—</span><span class="metric-unit">bpm</span></div>
-          <div class="metric-sub" id="sub-hr"></div>
+    <!-- ── Heart Rate ──────────────────────────────────────────────────── -->
+    <section class="card col-4 metric-card metric-card--hr" id="metric-hr" aria-label="Heart rate">
+      <div class="metric-header">
+        <div class="metric-icon-wrap" id="icon-hr"></div>
+        <div class="metric-label">Heart Rate</div>
+      </div>
+      <div class="metric-value-row">
+        <span class="metric-value" id="val-hr">—</span>
+        <span class="metric-unit">bpm</span>
+      </div>
+      <div class="metric-sub" id="sub-hr"></div>
+      <div class="mini-chart">
+        <canvas id="chart-mini-hr" height="40" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <!-- ── SpO₂ ───────────────────────────────────────────────────────── -->
+    <section class="card col-4 metric-card metric-card--spo2" id="metric-spo2" aria-label="Blood oxygen saturation">
+      <div class="metric-header">
+        <div class="metric-icon-wrap" id="icon-spo2"></div>
+        <div class="metric-label">SpO₂</div>
+      </div>
+      <div class="metric-value-row">
+        <span class="metric-value" id="val-spo2">—</span>
+        <span class="metric-unit">%</span>
+      </div>
+      <div class="metric-sub" id="sub-spo2"></div>
+      <div class="mini-chart">
+        <canvas id="chart-mini-spo2" height="40" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <!-- ── Body Temp ───────────────────────────────────────────────────── -->
+    <section class="card col-4 metric-card metric-card--btemp" id="metric-btemp" aria-label="Body temperature">
+      <div class="metric-header">
+        <div class="metric-icon-wrap" id="icon-btemp"></div>
+        <div class="metric-label">Body Temp</div>
+      </div>
+      <div class="metric-value-row">
+        <span class="metric-value" id="val-btemp">—</span>
+        <span class="metric-unit">°C</span>
+      </div>
+      <div class="metric-sub" id="sub-btemp"></div>
+      <div class="mini-chart">
+        <canvas id="chart-mini-btemp" height="40" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <!-- ── Blood Pressure ──────────────────────────────────────────────── -->
+    <section class="card col-4 metric-card metric-card--bp" id="metric-bp" aria-label="Blood pressure">
+      <div class="metric-header">
+        <div class="metric-icon-wrap" id="icon-bp"></div>
+        <div class="metric-label">Blood Pressure</div>
+      </div>
+      <div class="metric-value-row">
+        <span class="metric-value" id="val-bp-sys">—</span>
+        <span style="font-size:1.25rem;color:var(--text-muted);font-family:var(--font-mono);margin:0 2px">/</span>
+        <span class="metric-value" id="val-bp-dia">—</span>
+        <span class="metric-unit">mmHg</span>
+      </div>
+      <div class="metric-sub" id="sub-bp">Systolic / Diastolic</div>
+      <div class="mini-chart">
+        <canvas id="chart-mini-bp-sys" height="40" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <!-- ── Environment ────────────────────────────────────────────────── -->
+    <section class="card col-4" aria-label="Environment readings">
+      <h2 class="card-title">
+        <span id="icon-env-title"></span>
+        Environment
+      </h2>
+      <div class="env-grid">
+        <div class="env-item env-card--rtemp" id="metric-rtemp">
+          <div class="env-icon-wrap" id="icon-rtemp"></div>
+          <div class="env-info">
+            <div class="env-label">Room Temp</div>
+            <div class="env-value-row">
+              <span class="env-value" id="val-rtemp">—</span>
+              <span class="env-unit">°C</span>
+            </div>
+          </div>
         </div>
-        <div class="metric" id="metric-spo2">
-          <div class="metric-icon">🫁</div>
-          <div class="metric-label">SpO₂</div>
-          <div class="metric-value"><span id="val-spo2">—</span><span class="metric-unit">%</span></div>
-          <div class="metric-sub" id="sub-spo2"></div>
-        </div>
-        <div class="metric" id="metric-btemp">
-          <div class="metric-icon">🌡️</div>
-          <div class="metric-label">Body Temp</div>
-          <div class="metric-value"><span id="val-btemp">—</span><span class="metric-unit">°C</span></div>
-          <div class="metric-sub" id="sub-btemp"></div>
+        <div class="env-item env-card--hum" id="metric-hum">
+          <div class="env-icon-wrap" id="icon-hum"></div>
+          <div class="env-info">
+            <div class="env-label">Humidity</div>
+            <div class="env-value-row">
+              <span class="env-value" id="val-hum">—</span>
+              <span class="env-unit">%</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ── Environment ── -->
-    <section class="card">
-      <h2 class="card-title">Environment</h2>
-      <div class="metric-grid">
-        <div class="metric" id="metric-rtemp">
-          <div class="metric-icon">🌡️</div>
-          <div class="metric-label">Room Temp</div>
-          <div class="metric-value"><span id="val-rtemp">—</span><span class="metric-unit">°C</span></div>
-        </div>
-        <div class="metric" id="metric-hum">
-          <div class="metric-icon">💧</div>
-          <div class="metric-label">Humidity</div>
-          <div class="metric-value"><span id="val-hum">—</span><span class="metric-unit">%</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Risk Breakdown ── -->
-    <section class="card">
-      <h2 class="card-title">Risk Indicators</h2>
+    <!-- ── Risk Indicators ────────────────────────────────────────────── -->
+    <section class="card col-4" aria-label="Risk indicators">
+      <h2 class="card-title">
+        <span id="icon-risk-title"></span>
+        Risk Indicators
+      </h2>
       <div class="risk-grid">
         <div class="risk-chip" id="chip-heat">
-          <span class="risk-chip-label">🔥 Heat</span>
+          <div class="risk-chip-icon" id="icon-chip-heat"></div>
+          <span class="risk-chip-label">Heat Stress</span>
           <span class="risk-chip-value" id="val-heat">—</span>
         </div>
         <div class="risk-chip" id="chip-vital">
-          <span class="risk-chip-label">💓 Vital Signs</span>
+          <div class="risk-chip-icon" id="icon-chip-vital"></div>
+          <span class="risk-chip-label">Vital Signs</span>
           <span class="risk-chip-value" id="val-vital">—</span>
         </div>
         <div class="risk-chip" id="chip-resp">
-          <span class="risk-chip-label">🫁 SpO₂</span>
+          <div class="risk-chip-icon" id="icon-chip-resp"></div>
+          <span class="risk-chip-label">Respiratory</span>
           <span class="risk-chip-value" id="val-resp">—</span>
         </div>
       </div>
     </section>
 
-    <!-- ── Recommendation ── -->
-    <section class="card card--full">
-      <h2 class="card-title">Recommendation</h2>
-      <p id="recommendation" class="recommendation-text">Waiting for data…</p>
-      <ul id="reasons-list" class="reasons-list"></ul>
-    </section>
-
-    <!-- ── Trend Charts ── -->
-    <section class="card card--full">
-      <h2 class="card-title">Recent Trends</h2>
-      <div class="chart-row">
-        <div class="chart-wrap">
-          <div class="chart-label">Heart Rate (bpm)</div>
-          <canvas id="chart-hr" height="100"></canvas>
+    <!-- ── Pipeline Stats ─────────────────────────────────────────────── -->
+    <section class="card col-4" aria-label="Pipeline statistics">
+      <h2 class="card-title">
+        <span id="icon-stats-title"></span>
+        Pipeline Stats
+      </h2>
+      <div class="stat-grid">
+        <div class="stat-row">
+          <span class="stat-key"><span id="icon-stat-total"></span>Total readings</span>
+          <span class="stat-val" id="stat-total">—</span>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-label">SpO₂ (%)</div>
-          <canvas id="chart-spo2" height="100"></canvas>
+        <div class="stat-row">
+          <span class="stat-key"><span id="icon-stat-rejected"></span>Rejected packets</span>
+          <span class="stat-val" id="stat-rejected">—</span>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-label">Body Temperature (°C)</div>
-          <canvas id="chart-btemp" height="100"></canvas>
+        <div class="stat-row">
+          <span class="stat-key"><span id="icon-stat-device"></span>Device</span>
+          <span class="stat-val" id="stat-device">—</span>
         </div>
       </div>
     </section>
 
-    <!-- ── Stats ── -->
-    <section class="card">
-      <h2 class="card-title">Pipeline Stats</h2>
-      <div class="stat-list">
-        <div class="stat-row"><span>Total readings</span><span id="stat-total">—</span></div>
-        <div class="stat-row"><span>Rejected packets</span><span id="stat-rejected">—</span></div>
-        <div class="stat-row"><span>Device</span><span id="stat-device">—</span></div>
+    <!-- ── Recommendation ─────────────────────────────────────────────── -->
+    <section class="card col-full" aria-label="Health recommendation">
+      <h2 class="card-title">
+        <span id="icon-rec-title"></span>
+        Recommendation
+      </h2>
+      <div class="recommendation-wrap">
+        <div class="recommendation-icon" id="rec-icon"></div>
+        <div class="recommendation-body">
+          <p id="recommendation" class="recommendation-text">Waiting for data…</p>
+          <ul id="reasons-list" class="reasons-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Trend Charts ───────────────────────────────────────────────── -->
+    <section class="card col-full" aria-label="Trend charts">
+      <h2 class="card-title">
+        <span id="icon-trends-title"></span>
+        Recent Trends
+      </h2>
+      <div class="chart-row">
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <div class="chart-label">Heart Rate</div>
+            <div class="chart-live-val" id="live-hr">— bpm</div>
+          </div>
+          <canvas id="chart-hr" height="120" aria-label="Heart rate trend chart"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <div class="chart-label">SpO₂</div>
+            <div class="chart-live-val" id="live-spo2">— %</div>
+          </div>
+          <canvas id="chart-spo2" height="120" aria-label="SpO₂ trend chart"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <div class="chart-label">Body Temperature</div>
+            <div class="chart-live-val" id="live-btemp">— °C</div>
+          </div>
+          <canvas id="chart-btemp" height="120" aria-label="Body temperature trend chart"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-header">
+            <div class="chart-label">Blood Pressure (systolic)</div>
+            <div class="chart-live-val" id="live-bp-sys">— mmHg</div>
+          </div>
+          <canvas id="chart-bp-sys" height="120" aria-label="Blood pressure trend chart"></canvas>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Alert toast -->
-  <div id="alert-toast" class="alert-toast hidden"></div>
+  <!-- ══ Alert Toast ════════════════════════════════════════════════════════ -->
+  <div id="alert-toast" class="alert-toast" role="alert" aria-live="assertive">
+    <div class="toast-icon" id="toast-icon"></div>
+    <div class="toast-body">
+      <div class="toast-title" id="toast-title"></div>
+      <div class="toast-msg"   id="toast-msg"></div>
+    </div>
+    <button class="toast-close" id="toast-close" aria-label="Dismiss alert">
+      <span id="toast-close-icon"></span>
+    </button>
+  </div>
 
+  <!-- Load icons first, then main script -->
+  <script src="/static/js/icons.js"></script>
   <script src="/static/js/dashboard.js"></script>
 </body>
 </html>

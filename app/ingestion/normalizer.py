@@ -24,6 +24,8 @@ class SensorReading:
     body_temperature: float        # °C
     room_temperature: float        # °C
     humidity: float                # %
+    bp_sys: float                  # mmHg – systolic blood pressure
+    bp_dia: float                  # mmHg – diastolic blood pressure
 
     # Epoch seconds kept for DB storage
     timestamp_epoch: float
@@ -38,6 +40,8 @@ class SensorReading:
             "body_temperature": self.body_temperature,
             "room_temperature": self.room_temperature,
             "humidity": self.humidity,
+            "bp_sys": self.bp_sys,
+            "bp_dia": self.bp_dia,
         }
 
 
@@ -52,6 +56,9 @@ def normalize(payload: dict) -> SensorReading:
     epoch = float(payload["timestamp"])
     dt = datetime.datetime.fromtimestamp(epoch, tz=datetime.timezone.utc)
 
+    # Blood pressure arrives as a nested dict: {"sys": ..., "dia": ...}
+    bp = payload.get("blood_pressure", {})
+
     return SensorReading(
         timestamp=dt,
         timestamp_epoch=epoch,
@@ -61,4 +68,6 @@ def normalize(payload: dict) -> SensorReading:
         body_temperature=float(payload["body_temperature"]),
         room_temperature=float(payload["room_temperature"]),
         humidity=float(payload["humidity"]),
+        bp_sys=float(bp.get("sys", 0)),
+        bp_dia=float(bp.get("dia", 0)),
     )

@@ -33,6 +33,8 @@ class SensorReadingRecord(Base):
     body_temperature: Mapped[float] = mapped_column(Float, nullable=False)
     room_temperature: Mapped[float] = mapped_column(Float, nullable=False)
     humidity: Mapped[float] = mapped_column(Float, nullable=False)
+    bp_sys: Mapped[float] = mapped_column(Float, nullable=True)   # mmHg, systolic
+    bp_dia: Mapped[float] = mapped_column(Float, nullable=True)   # mmHg, diastolic
 
     def __repr__(self) -> str:
         return (

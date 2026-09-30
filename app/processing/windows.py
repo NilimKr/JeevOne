@@ -80,6 +80,8 @@ class SensorWindows:
         self.body_temperature = SignalWindow(short)
         self.room_temperature = SignalWindow(short)
         self.humidity = SignalWindow(short)
+        self.bp_sys = SignalWindow(short)
+        self.bp_dia = SignalWindow(short)
 
         # Long windows (trend analysis)
         self.heart_rate_long = SignalWindow(long_)
@@ -93,6 +95,8 @@ class SensorWindows:
         self.body_temperature.push(reading.body_temperature)
         self.room_temperature.push(reading.room_temperature)
         self.humidity.push(reading.humidity)
+        self.bp_sys.push(reading.bp_sys)
+        self.bp_dia.push(reading.bp_dia)
 
         self.heart_rate_long.push(reading.heart_rate)
         self.spo2_long.push(reading.spo2)

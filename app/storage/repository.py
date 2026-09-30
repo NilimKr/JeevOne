@@ -31,6 +31,8 @@ def insert_reading(reading: SensorReading) -> None:
         body_temperature=reading.body_temperature,
         room_temperature=reading.room_temperature,
         humidity=reading.humidity,
+        bp_sys=reading.bp_sys,
+        bp_dia=reading.bp_dia,
     )
     _execute_write(record)
 

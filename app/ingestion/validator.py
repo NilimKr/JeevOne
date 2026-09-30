@@ -41,6 +41,9 @@ _NUMERIC_FIELDS = [
     "timestamp",
 ]
 
+# BP is optional — sensor may not be fitted
+_OPTIONAL_NUMERIC_FIELDS = ["bp_sys", "bp_dia"]
+
 
 class ValidationError(Exception):
     """Raised (and caught) when a payload fails validation."""
@@ -106,3 +109,18 @@ def _check_plausibility(payload: dict) -> None:
             raise ValidationError(
                 f"Field '{field}' value {val} is outside plausible range [{lo}, {hi}] – likely sensor error"
             )
+
+    # Blood pressure: validate only if present in the nested object
+    bp = payload.get("blood_pressure", {})
+    bp_ranges = ranges.get("blood_pressure", {})
+    if bp and bp_ranges:
+        for sub in ("sys", "dia"):
+            val = bp.get(sub)
+            if val is not None:
+                bounds = bp_ranges.get(sub, {})
+                if bounds:
+                    lo, hi = bounds["min"], bounds["max"]
+                    if not (lo <= float(val) <= hi):
+                        raise ValidationError(
+                            f"BP {sub} value {val} is outside plausible range [{lo}, {hi}]"
+                        )
