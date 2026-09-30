@@ -115,15 +115,21 @@ The system exposes a lightweight REST API and a Server-Sent Events (SSE) stream 
 ### Expected Payload Structure
 ```json
 {
-  "device_id": "esp32_01",
+  "device_id": "patient_01",
   "timestamp": 1727650000,
-  "heart_rate": 72,
+  "heart_rate": 78,
   "spo2": 98,
-  "body_temperature": 36.8,
-  "room_temperature": 28.4,
-  "humidity": 61.2
+  "body_temperature": 37.2,
+  "room_temperature": 28.3,
+  "humidity": 61.5,
+  "blood_pressure": {
+    "sys": 122,
+    "dia": 81
+  }
 }
 ```
+> `blood_pressure` is **optional** — the pipeline handles payloads without it gracefully.
+
 
 ---
 
