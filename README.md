@@ -6,9 +6,9 @@
 ![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20macOS-lightgrey)
 ![Offline Capable](https://img.shields.io/badge/offline-fully_supported-success)
 
-Privacy-preserving, offline-capable health monitoring pipeline designed for edge devices like the Raspberry Pi.
+**JEEVONE** is an advanced, privacy-first edge health monitoring pipeline. Designed to operate completely offline, it acquires physiological and environmental sensor data, processes it locally using dynamic AI-assisted risk engines, and delivers real-time health intelligence through an intuitive dashboard. It ensures high resilience during disasters or power/network outages while keeping your health data firmly in your control.
 
-> **Note:** This system operates entirely locally. Internet access is NOT required for core operation. Your health data stays in your control.
+> **Note:** This system operates entirely locally on edge devices. Internet access is NOT required for core operation.
 
 ---
 
@@ -44,6 +44,8 @@ Our custom-built hardware node acquires real-time physiological and environmenta
 ![JEEV-ONE Circuit Diagram](./JEEV-ONE%20Circuit%20Diagram.png)
 
 ### Core Components
+- **Raspberry Pi 5:** Serves as the primary edge server hosting the MQTT broker, SQLite database, Python risk engines, and Flask API.
+- **3.5" TFT Display:** Directly attached to the Raspberry Pi to display the real-time health monitoring dashboard locally.
 - **ESP32 Microcontroller:** Serves as the central IoT gateway handling sensor I/O and MQTT communication.
 - **MAX30102:** Pulse Oximeter and Heart-Rate Sensor for continuous monitoring of SpO₂ and bpm.
 - **MLX90614:** Non-contact Infrared Thermometer for accurate body temperature readings.
