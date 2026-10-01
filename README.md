@@ -38,9 +38,12 @@ graph LR
 
 Our custom-built hardware node acquires real-time physiological and environmental data. It connects directly to the edge computing pipeline (Raspberry Pi) over local WiFi using MQTT.
 
-### Prototype & Circuit
+### Prototype
 
 ![JEEV-ONE Prototype](./JEEV-ONE%20Prototype.png)
+
+### Circuit
+
 ![JEEV-ONE Circuit Diagram](./JEEV-ONE%20Circuit%20Diagram.png)
 
 ### Core Components
