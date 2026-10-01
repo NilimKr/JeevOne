@@ -176,7 +176,7 @@ The system exposes a lightweight REST API and a Server-Sent Events (SSE) stream 
 A clean, modular directory structure ensuring easy maintenance and scalability:
 
 ```text
-personal-health-companion/
+jeev-one/
 ├── config/
 │   ├── config.yaml          # System parameters and thresholds
 │   └── mosquitto.conf       # MQTT Broker configuration
@@ -256,5 +256,4 @@ This system is built with strict **privacy by design**. The entire stack operate
 ## Important Disclaimers
 
 - **Sensor error ≠ health event.** Malformed or physically impossible readings are immediately rejected during the validation phase. A bad packet will never falsely trigger a health alert.
-- **Not a medical device.** All risk outputs are strictly intended as wellness monitoring indicators. The language used in auto-generated recommendations is intentionally conservative.
 - **Adaptive Baselines:** Personal baselines update slowly over time (using Exponential Moving Average, α=0.05) and automatically reject extreme outliers. Temporary anomalous readings will not persistently corrupt the individual's long-term baseline.
