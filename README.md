@@ -6,9 +6,9 @@
 ![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20macOS-lightgrey)
 ![Offline Capable](https://img.shields.io/badge/offline-fully_supported-success)
 
-**JEEVONE** is an advanced, privacy-first edge health monitoring pipeline. Designed to operate completely offline, it acquires physiological and environmental sensor data, processes it locally using dynamic AI-assisted risk engines, and delivers real-time health intelligence through an intuitive dashboard. It ensures high resilience during disasters or power/network outages while keeping your health data firmly in your control.
+**JEEVONE** is an advanced, privacy-first edge health monitoring system. Designed to operate completely offline, it acquires physiological and environmental sensor data, processes it locally using dynamic AI-assisted risk engines, and delivers real-time health intelligence through an intuitive dashboard. It ensures high resilience during disasters or power/network outages while keeping your health data firmly in your control.
 
-> **Note:** This system operates entirely locally on edge devices. Internet access is NOT required for core operation.
+> **Note:** This system operates entirely locally on edge devices. Internet access is NOT required for core operation. Your data stays in your control.
 
 ---
 
@@ -56,9 +56,9 @@ Our custom-built hardware node acquires real-time physiological and environmenta
 | Sensor | ESP32 Pin | Protocol | Notes |
 | :--- | :--- | :--- | :--- |
 | **MAX30102** | SDA: GPIO 21, SCL: GPIO 22 | I2C | Pull-up resistors required |
-| **MLX90614** | SDA: GPIO 21, SCL: GPIO 22 | I2C | Shares I2C bus with MAX30102 |
+| **MLX90614** | SDA: GPIO 32, SCL: GPIO 33 | I2C | Shares I2C bus with MAX30102 |
 | **DHT22** | DATA: GPIO 4 | One-Wire | 10k pull-up resistor to 3.3V |
-| **BP TTL** | TX: GPIO 16 (RX2), RX: GPIO 17 (TX2) | UART | 9600 baud rate |
+| **BP TTL** | TX: GPIO 16 (RX2), RX: GPIO 17 (TX2) | UART | 115200 baud rate |
 
 ### Required Libraries (Arduino IDE)
 Ensure you have the following libraries installed before compiling `ESP32_Gateway.ino`:

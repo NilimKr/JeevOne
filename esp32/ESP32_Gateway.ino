@@ -1,6 +1,16 @@
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
+#include <time.h> // NTP-based Unix timestamp
+
+// =============================================================================
+// RANDOMISED VITALS MODE
+// Simulates realistic sensor output with bounded random values.
+// Blood pressure updates every BP_INTERVAL ms (~30 min) since it cannot
+// realistically be measured every 10 seconds.
+// All other vitals (HR, SpO2, temp, humidity) update every `interval` (10 s).
+// MQTT pipeline, JSON field names, and topic are identical to the demo file.
+// =============================================================================
 
 // --- WiFi & MQTT Configuration ---
 const char *ssid = "Pixel_1811";
@@ -14,7 +24,41 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 unsigned long lastMsgTime = 0;
-const long interval = 5000; // Publish data every 5 seconds
+const long interval = 10000; // Vitals publish interval: 10 seconds
+
+// --- Blood Pressure: updated every 30 minutes ---
+// BP cannot be measured every 10 s; keep last reading and refresh slowly.
+const long BP_INTERVAL =
+    1800000UL; // 30 min in ms  (change to 3600000UL for 1 hr)
+unsigned long lastBPTime = 0 - BP_INTERVAL; // force a reading on first loop
+int bp_sys = 118;                           // initial healthy baseline
+int bp_dia = 75;
+
+// ---------------------------------------------------------------------------
+// randFloat(lo, hi, decimals)
+// Returns a float in [lo, hi] rounded to `decimals` decimal places.
+// Uses integer random() for portability on ESP32.
+// ---------------------------------------------------------------------------
+float randFloat(float lo, float hi, int decimals) {
+  long scale = 1;
+  for (int i = 0; i < decimals; i++)
+    scale *= 10;
+  long r = random((long)(lo * scale), (long)(hi * scale) + 1);
+  return (float)r / scale;
+}
+
+// --- NTP Configuration ---
+const char *ntp_server = "pool.ntp.org";
+const long gmt_offset = 19800; // IST = UTC+5:30
+const int dst_offset = 0;
+
+// Returns Unix epoch seconds; 0 if NTP not yet synced
+long getTimestamp() {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+    return 0;
+  return (long)mktime(&timeinfo);
+}
 
 void setup_wifi() {
   delay(10);
@@ -31,8 +75,9 @@ void reconnect() {
   // Try to connect once, but don't get stuck in a while loop!
   if (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    String clientId = "ESP32-HealthGateway-";
-    clientId += String(random(0, 0xffff), HEX);
+    // Use a fixed, deterministic client ID so the broker doesn't accumulate
+    // orphaned sessions every time the ESP32 reconnects.
+    String clientId = "ESP32-HealthGateway-1";
 
     if (client.connect(clientId.c_str())) {
       Serial.println("connected to MQTT!");
@@ -52,9 +97,21 @@ void setup() {
   // Set the MQTT Server (The Raspberry Pi's IP)
   client.setServer(mqtt_server, mqtt_port);
 
-  // Initialize your sensors here
-  // Wire.begin(); // For I2C (MLX90614, MAX30102)
-  // Serial2.begin(9600); // For BP Sensor UART
+  // Seed the random number generator with an unconnected ADC pin for entropy
+  randomSeed(analogRead(0));
+  Serial.println("[RANDOM VITALS MODE] Sending simulated sensor data.");
+
+  // Wait for WiFi then start NTP sync
+  unsigned long wifiWait = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - wifiWait < 10000) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  if (WiFi.status() == WL_CONNECTED) {
+    configTime(gmt_offset, dst_offset, ntp_server);
+    Serial.println("NTP sync started...");
+  }
 }
 
 void loop() {
@@ -71,36 +128,52 @@ void loop() {
   if (now - lastMsgTime > interval) {
     lastMsgTime = now;
 
-    // 1. Read values from your sensors (Mock values used here for
-    // demonstration)
-    float temp_body = 37.1;    // Read from MLX90614
-    int heart_rate = 75;       // Read from MAX30102
-    int spo2 = 98;             // Read from MAX30102
-    int bp_sys = 120;          // Read from BP TTL Module
-    int bp_dia = 80;           // Read from BP TTL Module
-    float temp_ambient = 28.5; // Read from DHT22
-    float humidity = 60.0;     // Read from DHT22
+    // 1. Generate bounded random vital readings (healthy baselines)
+
+    // --- Heart Rate: 60–85 bpm (normal resting range) ---
+    int heart_rate = (int)randFloat(60, 85, 0);
+
+    // --- SpO2: 96–99 % (healthy range) ---
+    int spo2 = (int)randFloat(96, 99, 0);
+
+    // --- Body Temperature: 36.4–37.4 °C (normal oral range) ---
+    float body_temperature = randFloat(36.4, 37.4, 1);
+
+    // --- Room Temperature: 24–32 °C ---
+    float room_temperature = randFloat(24.0, 32.0, 1);
+
+    // --- Humidity: 45–70 % RH ---
+    float humidity = randFloat(45.0, 70.0, 1);
+
+    // --- Blood Pressure: refresh only every BP_INTERVAL (30 min) ---
+    // sys: 108–125 mmHg  |  dia: 62–79 mmHg  (healthy / pre-hypertension
+    // boundary)
+    if (now - lastBPTime >= BP_INTERVAL) {
+      lastBPTime = now;
+      bp_sys = (int)randFloat(108, 125, 0);
+      bp_dia = (int)randFloat(62, 79, 0); // dia always < 80 (healthy)
+      Serial.println("[BP] Reading updated.");
+    }
 
     // 2. Create a JSON document to pack the data neatly
     // This makes it extremely easy for the Raspberry Pi Python script to read
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<512> doc;
 
     doc["device_id"] = "patient_01";
-    doc["hr"] = heart_rate;
+    doc["timestamp"] = getTimestamp(); // Unix epoch seconds (IST)
+    doc["heart_rate"] = heart_rate;
     doc["spo2"] = spo2;
-    doc["temp_body"] = temp_body;
+    doc["body_temperature"] = body_temperature;
+    doc["room_temperature"] = room_temperature; // flat — no nested env object
+    doc["humidity"] = humidity;                 // flat — no nested env object
 
-    // Create nested objects for clarity
+    // blood_pressure stays nested (sys/dia are paired values)
     JsonObject bp = doc.createNestedObject("blood_pressure");
     bp["sys"] = bp_sys;
     bp["dia"] = bp_dia;
 
-    JsonObject env = doc.createNestedObject("environment");
-    env["temp"] = temp_ambient;
-    env["humidity"] = humidity;
-
     // 3. Serialize JSON into a character buffer
-    char jsonBuffer[256];
+    char jsonBuffer[512];
     serializeJson(doc, jsonBuffer);
 
     // 4. Print to Serial Monitor NO MATTER WHAT (Even without WiFi)
@@ -115,8 +188,9 @@ void loop() {
       }
 
       if (client.connected()) {
-        Serial.println("Status: Successfully published to Raspberry Pi!");
-        client.publish("health/vitals/patient_01", jsonBuffer);
+        bool ok = client.publish("health/sensors", jsonBuffer);
+        Serial.println(ok ? "Status: Published to RPi [health/sensors] ✓"
+                          : "Status: Publish failed (buffer full?)");
       } else {
         Serial.println("Status: Waiting for Raspberry Pi MQTT Broker...");
       }
