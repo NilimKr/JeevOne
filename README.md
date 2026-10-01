@@ -3,7 +3,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20macOS-lightgrey)
+![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20Windows%20%7C%20Linux%20%7C%20MacOS-lightgrey)
 ![Offline Capable](https://img.shields.io/badge/offline-fully_supported-success)
 
 **JEEV-ONE** is an advanced, privacy-first edge health monitoring system. Designed to operate completely offline, it acquires physiological and environmental sensor data, processes it locally using dynamic AI-assisted risk engines, and delivers real-time health intelligence through an intuitive dashboard. It ensures high resilience during disasters or power/network outages while keeping your health data firmly in your control.
