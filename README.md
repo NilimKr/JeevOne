@@ -34,6 +34,42 @@ graph LR
 
 ---
 
+## Hardware Prototype
+
+Our custom-built hardware node acquires real-time physiological and environmental data. It connects directly to the edge computing pipeline (Raspberry Pi) over local WiFi using MQTT.
+
+### Prototype & Circuit
+
+![JEEV-ONE Prototype](./JEEV-ONE%20Prototype.png)
+![JEEV-ONE Circuit Diagram](./JEEV-ONE%20Circuit%20Diagram.png)
+
+### Core Components
+- **ESP32 Microcontroller:** Serves as the central IoT gateway handling sensor I/O and MQTT communication.
+- **MAX30102:** Pulse Oximeter and Heart-Rate Sensor for continuous monitoring of SpO₂ and bpm.
+- **MLX90614:** Non-contact Infrared Thermometer for accurate body temperature readings.
+- **DHT22:** Precision Temperature and Humidity sensor to capture ambient environmental conditions.
+- **BP TTL Module:** Serial-based blood pressure monitoring module (capturing Systolic/Diastolic).
+
+### Pin Connections (ESP32)
+| Sensor | ESP32 Pin | Protocol | Notes |
+| :--- | :--- | :--- | :--- |
+| **MAX30102** | SDA: GPIO 21, SCL: GPIO 22 | I2C | Pull-up resistors required |
+| **MLX90614** | SDA: GPIO 21, SCL: GPIO 22 | I2C | Shares I2C bus with MAX30102 |
+| **DHT22** | DATA: GPIO 4 | One-Wire | 10k pull-up resistor to 3.3V |
+| **BP TTL** | TX: GPIO 16 (RX2), RX: GPIO 17 (TX2) | UART | 9600 baud rate |
+
+### Required Libraries (Arduino IDE)
+Ensure you have the following libraries installed before compiling `ESP32_Gateway.ino`:
+- `WiFi.h` (Built-in)
+- `PubSubClient` by Nick O'Leary (MQTT)
+- `ArduinoJson` by Benoit Blanchon (Payload serialization)
+- `Wire.h` (Built-in for I2C)
+- `SparkFun_MAX3010x_Sensor_Library` (For MAX30102)
+- `Adafruit_MLX90614` (For MLX90614)
+- `DHT sensor library` by Adafruit (For DHT22)
+
+---
+
 ## Quick Start
 
 ### 1. Install Dependencies
