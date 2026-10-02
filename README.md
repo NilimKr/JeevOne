@@ -40,11 +40,11 @@ Our custom-built hardware node acquires real-time physiological and environmenta
 
 ### Prototype
 
-![JEEV-ONE Prototype](./JEEV-ONE%20Prototype.png)
+![JEEV-ONE Prototype](./Prototype%20Demo.png)
 
 ### Circuit
 
-![JEEV-ONE Circuit Diagram](./JEEV-ONE%20Circuit%20Diagram.png)
+![JEEV-ONE Circuit Diagram](./Circuit%20Diagram.png)
 
 ### Core Components
 - **Raspberry Pi 5:** Serves as the primary edge server hosting the MQTT broker, SQLite database, Python risk engines, and Flask API.
