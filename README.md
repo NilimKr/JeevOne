@@ -1,4 +1,4 @@
-# JEEV-ONE 
+# JEEV-ONE
 ### Your Unified Health Monitor
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
