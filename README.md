@@ -75,59 +75,6 @@ Ensure you have the following libraries installed before compiling `ESP32_Gatewa
 
 ---
 
-## Quick Start
-
-### 1. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Install and Start Mosquitto Broker
-
-**macOS (Development):**
-```bash
-brew install mosquitto
-/opt/homebrew/opt/mosquitto/sbin/mosquitto -c config/mosquitto.conf -d
-```
-> *Note:* The `persistence` block in `mosquitto.conf` is ignored on macOS unless `/var/lib/mosquitto/` exists. For local development, persistence is optional.
-
-**Raspberry Pi (Production):**
-```bash
-sudo apt install mosquitto mosquitto-clients -y
-sudo cp config/mosquitto.conf /etc/mosquitto/conf.d/health.conf
-sudo systemctl restart mosquitto
-```
-> *Note:* `apt install mosquitto` automatically creates `/var/lib/mosquitto/`, so persistence works out of the box.
-
-### 3. Start the Processing Pipeline
-
-This will initialize the pipeline, REST API, and real-time dashboard.
-
-```bash
-python -m app.main
-```
-
-**Access the Dashboard:** Open `http://localhost:8000` in a web browser.
-
-### 4. Run the ESP32 Simulator (Optional)
-
-If you do not have physical hardware connected, you can simulate sensor data:
-
-```bash
-# Normal scenario
-python scripts/simulate_esp32.py --scenario normal --interval 2
-
-# Heat-stress test
-python scripts/simulate_esp32.py --scenario heat_stress --count 30
-
-# List available scenarios
-python scripts/simulate_esp32.py --list
-```
-> *Scenarios available:* `normal` | `heat_stress` | `abnormal_hr` | `low_spo2` | `combined_risk`
-
----
-
 ## API Endpoints
 
 The system exposes a lightweight REST API and a Server-Sent Events (SSE) stream for real-time dashboard updates.
